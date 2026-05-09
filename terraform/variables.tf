@@ -16,8 +16,8 @@ variable "lambda_function_name" {
   default     = "SalesNotificationHandler"
 }
 
-variable "lab_role_arn" {
-  description = "The ARN of the pre-existing LabRole from AWS Academy"
+variable "account_id" {
+  description = "The AWS Account ID"
   type        = string
 }
 

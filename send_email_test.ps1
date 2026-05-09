@@ -1,4 +1,4 @@
-$url = "https://wpad4de6lcroi5o7uaimbvokuu0glhhv.lambda-url.us-east-1.on.aws/"
+$url = "https://hfchkddca34oeu2mr4u5a3ec5m0lfeay.lambda-url.us-east-1.on.aws/"
 
 $payload = @{
     item  = "Industrial Robot Arm"

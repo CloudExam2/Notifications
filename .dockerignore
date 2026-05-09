@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Terraform
+.terraform/
+*.tfstate*
+*.tfvars
+.terraform.lock.hcl
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+.env
+
+# AWS & Lambda
+.aws/
+*.zip
+lambda_function_payload.zip
+
+# System/OS
+.DS_Store
+Thumbs.db

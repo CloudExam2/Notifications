@@ -5,7 +5,7 @@ provider "aws" {
 data "archive_file" "lambda_zip" {
   type        = "zip"
   # Navigates: terraform/ -> root/ -> lambda_notifications/ -> file
-  source_file = "${path.module}/../lambda_notifications/lambda_function.py"
+  source_file = "${path.module}/../src/lambda_function.py"
   output_path = "${path.module}/lambda_function_payload.zip"
 }
 
@@ -22,14 +22,19 @@ resource "aws_sns_topic_subscription" "email_target" {
 }
 
 # 3. Lambda Function
+# Automatically gets your current Account ID and Partition
+data "aws_caller_identity" "current" {}
+
+# Dynamically constructs the LabRole ARN
+locals {
+  lab_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/LabRole"
+}
+
 resource "aws_lambda_function" "notification_service" {
-  filename         = data.archive_file.lambda_zip.output_path
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
-  
-  function_name    = var.lambda_function_name
-  role             = var.lab_role_arn  # Direct reference to pre-existing role
-  handler          = "lambda_function.lambda_handler"
-  runtime          = "python3.12"
+  function_name = var.lambda_function_name
+  role          = local.lab_role_arn  # Use singular 'local'
+  package_type  = "Image"
+  image_uri     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/notifications-service:latest"
 
   environment {
     variables = {

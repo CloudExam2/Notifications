@@ -2,3 +2,5 @@
 .terraform/
 .terraform.lock.hcl
 *.zip
+/__pycache__/
+.env
