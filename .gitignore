@@ -1,6 +1,26 @@
-.tfstate
+# Python
+**/__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Terraform
 .terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
 .terraform.lock.hcl
-*.zip
-/__pycache__/
+
+# Environment & Secrets
 .env
+.aws/
+credentials
+
+# OS Specific
+.DS_Store
+Thumbs.db
+
+# Deployment Artifacts
+*.zip
+*.log

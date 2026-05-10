@@ -2,11 +2,8 @@ provider "aws" {
   region = "us-east-1"
 }
 
-data "archive_file" "lambda_zip" {
-  type        = "zip"
-  # Navigates: terraform/ -> root/ -> lambda_notifications/ -> file
-  source_file = "${path.module}/../src/lambda_function.py"
-  output_path = "${path.module}/lambda_function_payload.zip"
+data "aws_ecr_repository" "notification" {
+  name = "notification-service"
 }
 
 # 1. SNS Topic
@@ -32,9 +29,11 @@ locals {
 
 resource "aws_lambda_function" "notification_service" {
   function_name = var.lambda_function_name
-  role          = local.lab_role_arn  # Use singular 'local'
+  role          = local.lab_role_arn
   package_type  = "Image"
-  image_uri     = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/notifications-service:latest"
+  
+  # FIX: Using the data source directly is safer than constructing strings
+  image_uri     = "${data.aws_ecr_repository.notification.repository_url}:latest"
 
   environment {
     variables = {
@@ -43,8 +42,9 @@ resource "aws_lambda_function" "notification_service" {
   }
 }
 
-# 7. Lambda Function URL (For Integration)
-resource "aws_lambda_function_url" "notification_url" {
-  function_name      = aws_lambda_function.notification_service.function_name
-  authorization_type = "NONE"
+# 4. The trigger from SQS
+resource "aws_lambda_event_source_mapping" "sqs_trigger" {
+  event_source_arn = data.aws_sqs_queue.ticket_queue.arn # Found via data block
+  function_name    = aws_lambda_function.notification_service.arn
+  batch_size       = 10
 }
