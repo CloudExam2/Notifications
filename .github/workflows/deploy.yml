@@ -32,6 +32,20 @@ jobs:
           docker build -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest .
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+          terraform_wrapper: false
+
+      - name: Terraform Init & Apply
+        working-directory: ./terraform
+        run: |
+          terraform init
+          terraform apply -auto-approve
+        env:
+          TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
+
       - name: Update Lambda Image
         run: |
           FUNCTION_NAME="SalesNotificationHandler"
@@ -40,5 +54,6 @@ jobs:
               --function-name "$FUNCTION_NAME" \
               --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
           else
-            echo "Lambda function $FUNCTION_NAME not found; skipping update until Notification TF is applied."
+            echo "Lambda function $FUNCTION_NAME not found; there was a Terraform provisioning error."
+            exit 1
           fi
