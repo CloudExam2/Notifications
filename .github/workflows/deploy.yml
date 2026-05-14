@@ -39,12 +39,13 @@ jobs:
           terraform_wrapper: false
 
       - name: Terraform Init & Apply
-        working-directory: ./terraform
         run: |
           terraform init
           terraform apply -auto-approve
         env:
-          TF_VAR_notification_email: ${{ secrets.NOTIFICATION_EMAIL }}
+          TF_VAR_github_owner: ${{ github.repository_owner }}
+          TF_VAR_github_repo: "Sales" # Or use ${{ github.event.repository.name }}
+          TF_VAR_github_token: ${{ secrets.GH_PAT }}
 
       - name: Update Lambda Image
         run: |
