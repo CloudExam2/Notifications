@@ -34,6 +34,11 @@ jobs:
 
       - name: Update Lambda Image
         run: |
-          aws lambda update-function-code \
-            --function-name notification-handler \
-            --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+          FUNCTION_NAME="SalesNotificationHandler"
+          if aws lambda get-function --function-name "$FUNCTION_NAME" >/dev/null 2>&1; then
+            aws lambda update-function-code \
+              --function-name "$FUNCTION_NAME" \
+              --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+          else
+            echo "Lambda function $FUNCTION_NAME not found; skipping update until Notification TF is applied."
+          fi
